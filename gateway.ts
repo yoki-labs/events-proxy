@@ -9,6 +9,8 @@ export function spawnGateway(gatewayOptions: GatewayOptions) {
       body: JSON.stringify(data),
     });
   });
+
+  return gateway;
 }
 
 export interface GatewayOptions extends WebSocketOptions {
