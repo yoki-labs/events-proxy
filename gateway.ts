@@ -7,6 +7,9 @@ export function spawnGateway(gatewayOptions: GatewayOptions) {
   gateway.socket.on("message", async (data) => {
     await fetch(gatewayOptions.userEndpointUrl, {
       body: JSON.stringify(data),
+    }).catch(() => {
+      // TODO: handle errors better in future but for now this will prevent errors from crashing the bot
+      return null;
     });
   });
 
