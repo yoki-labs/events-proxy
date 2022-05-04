@@ -1,0 +1,39 @@
+version: "3.7"
+services:
+    db:
+        image: postgres
+        restart: unless-stopped
+        container_name: GUILDED_INTERACTION_DB
+        environment:
+            POSTGRES_DB: guilded_interaction
+            POSTGRES_USER: guilded_interaction_user
+            POSTGRES_PASSWORD: guilded_interaction_pass
+        networks:
+            - main-network
+        volumes:
+            - ginteractions-postgres-data:/var/lib/postgresql/data
+        ports:
+            - 5432:5432
+    gateway:
+        build:
+            context: ./services/gateway
+            dockerfile: Dockerfile.dev
+        depends_on:
+            - db
+        volumes:
+            - "./services/gateway/src:/usr/app/src"
+        restart: "no"
+        environment:
+            DATABASE_URL: "postgresql://guilded_interaction_user:guilded_interaction_pass@db:5432/guilded_interaction?schema=public"
+            SERVER_PORT: 3335
+        ports:
+            - 3335:3335
+        networks:
+            - main-network
+
+volumes:
+    ginteractions-postgres-data:
+
+networks:
+    main-network:
+        driver: bridge

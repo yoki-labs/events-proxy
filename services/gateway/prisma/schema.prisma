@@ -1,0 +1,21 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Bot {
+    id      Int    @id @default(autoincrement())
+    token   String @db.VarChar(255)
+    ownerId String @db.VarChar(255)
+    botId   String @db.VarChar(255)
+}
+
+model Request {
+    id        Int    @id @default(autoincrement())
+    botId     String @db.VarChar(255)
+    eventType String @db.VarChar(255)
+}

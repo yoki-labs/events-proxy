@@ -1,0 +1,23 @@
+FROM node:16-alpine
+WORKDIR /opt/build/services/gateway
+
+RUN apk add --update \
+	&& apk add --no-cache ca-certificates \
+	&& apk add --no-cache --virtual .build-deps curl bash jq \
+	&& curl -L https://yarnpkg.com/install.sh | bash
+
+COPY package.json ./
+RUN yarn install
+
+COPY ./prisma/. ./prisma/
+RUN yarn generate
+
+COPY tsconfig.json nodemon.json ./
+COPY ./src/. ./src/
+RUN yarn build
+
+FROM node:16-alpine
+WORKDIR /usr/app
+
+COPY --from=0 ./opt/build/services/gateway/. ./
+CMD ["yarn", "run", "dev"]

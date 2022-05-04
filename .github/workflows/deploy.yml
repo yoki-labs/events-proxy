@@ -1,0 +1,69 @@
+name: Deploy to Production
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - main
+        paths:
+            - "services/gateway/**"
+jobs:
+    docker:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                service-name: [bot]
+        steps:
+            - uses: actions/checkout@v2
+            - name: Build
+              uses: jerray/publish-docker-action@v1.0.5
+              with:
+                  username: ${{ github.repository_owner }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+                  registry: docker.pkg.github.com
+                  repository: ${{ github.repository }}/${{ matrix.service-name }}
+                  file: docker/${{ matrix.service-name }}/Dockerfile
+    # deploy:
+    #     name: Deploy to Production
+    #     needs: [docker]
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - name: Checkout repository
+    #           uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3
+
+    #         - name: Verify Changed files
+    #           uses: dorny/paths-filter@v2
+    #           id: verify-changed-files
+    #           with:
+    #               filters: |
+    #                   db:
+    #                     - 'services/bot/prisma/migrations/**'
+    #                     - 'services/bot/prisma/schema.prisma'
+
+    #         - name: Install Node v14
+    #           if: steps.verify-changed-files.outputs.db == 'true'
+    #           uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # tag=v3
+    #           with:
+    #               node-version: "16"
+    #               cache: "yarn"
+
+    #         - name: Run database migration if schema changed.
+    #           if: steps.verify-changed-files.outputs.db == 'true'
+    #           run: |
+    #               yarn global add prisma
+    #               cd services/bot
+    #               yarn migrate:prod:ci
+    #           env:
+    #               DATABASE_URL: ${{ secrets.DATABASE_MIGRATION_URL }}
+
+    #         - name: executing remote ssh commands using ssh key
+    #           uses: appleboy/ssh-action@master
+    #           with:
+    #               host: ${{ secrets.VPS_HOST }}
+    #               username: nico
+    #               password: ${{ secrets.VPS_PASSWORD }}
+    #               port: 22005
+    #               script: |
+    #                   cd yoki
+    #                   cd docker/compose && docker-compose pull
+    #                   cd ../../
+    #                   ./run-prod.sh
