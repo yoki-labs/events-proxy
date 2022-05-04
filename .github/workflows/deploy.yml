@@ -11,7 +11,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                service-name: [bot]
+                service-name: [gateway]
         steps:
             - uses: actions/checkout@v2
             - name: Build
@@ -21,7 +21,7 @@ jobs:
                   password: ${{ secrets.GITHUB_TOKEN }}
                   registry: docker.pkg.github.com
                   repository: ${{ github.repository }}/${{ matrix.service-name }}
-                  file: docker/${{ matrix.service-name }}/Dockerfile
+                  file: services/${{ matrix.service-name }}/Dockerfile
     # deploy:
     #     name: Deploy to Production
     #     needs: [docker]
