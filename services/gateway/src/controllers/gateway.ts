@@ -7,15 +7,16 @@ import type { ConnectionStore } from "../typings";
 export function build(connections: ConnectionStore) {
     return {
         spawnGateway: (req: Request, res: Response) => {
+            console.log(req.body);
             const gateway = new WebSocketManager(req.body.wsOptions);
             const connectionId = nanoid(21);
             const { endpointURL } = req.body.options;
             gateway.connect();
-            gateway.emitter.on("gatewayEvent", (event, data) =>
-                fetch(endpointURL, { body: JSON.stringify({ event, data }) })
+            gateway.emitter.on("gatewayEvent", (event, data) => {
+                fetch(endpointURL, { headers: { Accept: "application/json", "Content-Type": "application/json" }, body: JSON.stringify({ event, data: data.d }), method: "POST" })
                     .then(() => console.log(`Successfully sent event ${event} to ${endpointURL}`))
-                    .catch(console.error)
-            );
+                    .catch(console.error);
+            });
             connections.set(connectionId, { wsOptions: req.body.wsOptions, ws: gateway, options: req.body.options });
 
             return res.status(200).json({ success: true, data: { connectionId } });

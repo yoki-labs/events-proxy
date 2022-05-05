@@ -9,7 +9,7 @@ services:
             POSTGRES_USER: guilded_interaction_user
             POSTGRES_PASSWORD: guilded_interaction_pass
         networks:
-            - main-network
+            - db-network
         volumes:
             - ginteractions-postgres-data:/var/lib/postgresql/data
         ports:
@@ -18,7 +18,7 @@ services:
         build:
             context: .
             dockerfile: ./services/gateway/Dockerfile
-        command: sh -c "yarn add global typescript && yarn run dev"
+        command: "yarn run dev"
         depends_on:
             - db
         volumes:
@@ -30,11 +30,15 @@ services:
         ports:
             - 3335:3335
         networks:
-            - main-network
+            - db-network
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
 
 volumes:
     ginteractions-postgres-data:
 
+
 networks:
-    main-network:
+    db-network:
         driver: bridge
+    

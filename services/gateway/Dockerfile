@@ -16,8 +16,6 @@ COPY ./services/gateway/tsconfig.json ./services/gateway/nodemon.json ./
 COPY ./services/gateway/src/. ./src/
 RUN yarn build
 
-RUN yarn remove $(cat package.json | jq -r '.devDependencies | keys | join(" ")')
-
 FROM node:16-alpine
 WORKDIR /usr/app
 

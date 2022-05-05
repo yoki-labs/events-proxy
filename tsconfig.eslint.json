@@ -1,5 +1,5 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig.json",
     "extends": "./services/gateway/tsconfig.json",
-    "include": ["services", "scripts"]
+    "include": ["services", "scripts", "test-client"]
 }
