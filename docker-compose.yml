@@ -16,8 +16,9 @@ services:
             - 5432:5432
     gateway:
         build:
-            context: ./services/gateway
-            dockerfile: Dockerfile.dev
+            context: .
+            dockerfile: ./services/gateway/Dockerfile
+        command: sh -c "yarn add global typescript && yarn run dev"
         depends_on:
             - db
         volumes:

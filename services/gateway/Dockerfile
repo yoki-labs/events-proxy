@@ -6,14 +6,14 @@ RUN apk add --update \
 	&& apk add --no-cache --virtual .build-deps curl bash jq \
 	&& curl -L https://yarnpkg.com/install.sh | bash
 
-COPY package.json ./
+COPY ./services/gateway/package.json ./
 RUN yarn install
 
-COPY ./prisma/. ./prisma/
+COPY ./services/gateway/prisma/. ./prisma/
 RUN yarn generate
 
-COPY tsconfig.json nodemon.json ./
-COPY ./src/. ./src/
+COPY ./services/gateway/tsconfig.json ./services/gateway/nodemon.json ./
+COPY ./services/gateway/src/. ./src/
 RUN yarn build
 
 RUN yarn remove $(cat package.json | jq -r '.devDependencies | keys | join(" ")')
