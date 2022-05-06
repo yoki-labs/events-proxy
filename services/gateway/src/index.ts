@@ -12,6 +12,9 @@ const PORT = process.env.SERVER_PORT ?? 80;
 });
 
 process.on("unhandledRejection", console.log);
-API.listen(PORT, () => {
-    console.log(`REST listening at http://localhost:${PORT}`);
-});
+
+void (async () => {
+    (await API()).listen(PORT, () => {
+        console.log(`REST listening at http://localhost:${PORT}`);
+    });
+})();

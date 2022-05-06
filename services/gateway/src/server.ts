@@ -1,10 +1,13 @@
+import { PrismaClient } from "@prisma/client";
 import express from "express";
 import { build as buildGatewayFunctions } from "./controllers/gateway";
-import type { Connection } from "./typings";
+import type { Connection, Option } from "./typings";
+import { validateOptions } from "./util";
 
 const app = express();
+const prisma = new PrismaClient();
 const connections = new Map<string, Connection>();
-const gatewayFunctions = buildGatewayFunctions(connections);
+const gatewayFunctions = buildGatewayFunctions(connections, prisma);
 
 app.use(
     express.urlencoded({
@@ -14,7 +17,24 @@ app.use(
 app.use(express.json());
 
 app.get("/", (req, res) => res.json({ success: true, data: { message: "Server is alive!" } }));
-app.post("/connections", gatewayFunctions.spawnGateway);
-app.delete("/connections/:connectionId", gatewayFunctions.destroyGateway);
+app.post(
+    "/connections",
+    validateOptions<Option>([
+        ["botId", "string", false],
+        ["endpointURL", "string", false],
+        ["ownerId", "string", false],
+        ["token", "string", false],
+    ]),
+    gatewayFunctions.spawnGateway
+);
+app.delete("/connections/:connectionId", validateOptions<Option>([["botId", "string", false]]), gatewayFunctions.destroyGateway);
 
-export default app;
+export default async () => {
+    const connectionsToCreate = await prisma.bot.findMany({});
+    console.log(`Found ${connectionsToCreate.length} connections to reconnect.`);
+    for (const { token, endpointURL, botId, ownerId } of connectionsToCreate) {
+        const data = gatewayFunctions.createConnection({ token, endpointURL, botId, ownerId });
+        console.log(`Created connection ${data.connectionId} with botId of ${data.options.botId}`);
+    }
+    return app;
+};

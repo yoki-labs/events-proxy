@@ -10,7 +10,9 @@
         "lint:fix": "yarn lint --fix",
         "prepare": "npx husky install",
         "prettier": "npx prettier --write **/*.{ts,js,json,yml,yaml,md}",
-        "clear": "npx rimraf node_modules services/**/node_modules"
+        "clear": "npx rimraf node_modules services/**/node_modules",
+        "migrate": "cd services/gateway && yarn migrate:dev",
+        "generate": "cd services/gateway && yarn generate"
     },
     "devDependencies": {
         "@sapphire/eslint-config": "^4.3.2",
