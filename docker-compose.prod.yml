@@ -1,7 +1,7 @@
 version: "3.7"
 services:
     gateway:
-        image: docker.pkg.github.com/yoki-labs/guilded_interaction/gateway
+        image: docker.pkg.github.com/yoki-labs/guilded-interactions/gateway:latest
         container_name: GUILDED_INTERACTION_GATEWAY
         restart: unless-stopped
         env_file:
