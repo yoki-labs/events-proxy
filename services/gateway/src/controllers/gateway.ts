@@ -23,8 +23,9 @@ export function build(connections: ConnectionStore, prisma: PrismaClient) {
     };
 
     const spawnGateway = async (req: Request, res: Response) => {
-        const { connectionId, options } = createConnection(req.body);
+        const { connectionId, options, ws } = createConnection(req.body);
         await prisma.bot.create({ data: options });
+        connections.set(connectionId, { ...options, ws });
         return res.status(200).json({ success: true, data: { connectionId } });
     };
 
