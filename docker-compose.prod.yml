@@ -5,6 +5,6 @@ services:
         container_name: GUILDED_INTERACTION_GATEWAY
         restart: unless-stopped
         env_file:
-            - ../.env
+            - ./.env
         ports:
             - "${SERVER_PORT}:${SERVER_PORT}"
