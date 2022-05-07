@@ -1,7 +1,8 @@
 import type { WebSocketManager, WebSocketOptions } from "@guildedjs/ws";
+import type { Worker } from "worker_threads";
 
 export interface Connection {
-    ws: WebSocketManager;
+    worker: Worker;
     options: Option;
 }
 export interface Option {

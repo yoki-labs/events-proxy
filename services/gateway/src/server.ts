@@ -36,9 +36,9 @@ export default async () => {
     const connectionsToCreate = await prisma.bot.findMany({});
     console.log(`Found ${connectionsToCreate.length} connections to reconnect.`);
     for (const { token, endpointURL, botId, ownerId } of connectionsToCreate) {
-        const { connectionId, options, ws } = gatewayFunctions.createConnection({ token, endpointURL, botId, ownerId });
+        const { connectionId, options, worker } = gatewayFunctions.createConnection({ token, endpointURL, botId, ownerId });
         console.log(`Created connection ${connectionId} with botId of ${options.botId}`);
-        connections.set(connectionId, { options, ws });
+        connections.set(connectionId, { options, worker });
     }
     return app;
 };

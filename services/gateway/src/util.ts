@@ -18,7 +18,7 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
     const authHeader = req.headers.authorization;
     const token = authHeader?.split(" ")[1];
 
-    if (!token) return res.status(401).json({ success: false, data: { message: `Unauthorized` } });
+    if (!token) return res.status(401).json({ success: false, data: { message: "You must provide a valid authentication token." } });
 
     try {
         /**
@@ -28,6 +28,6 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
         jwt.verify(token, process.env.TOKEN_SECRET);
         return next();
     } catch {
-        return res.status(401).json({ success: false, data: { message: `Unauthorized` } });
+        return res.status(401).json({ success: false, data: { message: "There was an issue parsing the provided token." } });
     }
 }
