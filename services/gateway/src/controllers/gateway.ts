@@ -6,20 +6,28 @@ import fetch from "node-fetch";
 import type { ConnectionStore, Option } from "../typings";
 
 export function build(connections: ConnectionStore, prisma: PrismaClient) {
-    const createConnection = ({ botId, endpointURL, ownerId, token }: Option) => {
+    const createConnection = ({ botId, endpointURL, ownerId, token, authorization, optInEvents }: Option) => {
         const connectionId = nanoid(21);
         const gateway = new WebSocketManager({ token });
         gateway.connect();
         gateway.emitter.on("gatewayEvent", (event, data) => {
+            // EVENT WAS NOT DESIRED
+            if (!optInEvents.includes(event)) return;
+
+            // EVENT WAS OPTED INTO
             fetch(endpointURL, {
-                headers: { Accept: "application/json", "Content-Type": "application/json" },
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: authorization || ""
+                },
                 body: JSON.stringify({ event, data: data.d }),
                 method: "POST",
             })
                 .then(() => console.log(`Successfully sent event ${event} to ${endpointURL}`))
                 .catch(console.error);
         });
-        return { connectionId, ws: gateway, options: { botId, endpointURL, ownerId, token } };
+        return { connectionId, ws: gateway, options: { botId, endpointURL, ownerId, token, authorization } };
     };
 
     const spawnGateway = async (req: Request, res: Response) => {
