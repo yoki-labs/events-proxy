@@ -17,25 +17,28 @@ app.use(
 app.use(express.json());
 
 app.get("/", (req, res) => res.json({ success: true, data: { message: "Server is alive!" } }));
-app.post(
-    "/connections",
-    authenticateToken,
-    validateOptions<Option>([
-        ["botId", "string", false],
-        ["endpointURL", "string", false],
-        ["ownerId", "string", false],
-        ["token", "string", false],
-    ]),
-    gatewayFunctions.spawnGateway
-);
+
+app.route("/connections")
+    .get(authenticateToken, gatewayFunctions.getGateways)
+    .post(
+        authenticateToken,
+        validateOptions<Option>([
+            ["botId", "string", false],
+            ["endpointURL", "string", false],
+            ["ownerId", "string", false],
+            ["token", "string", false],
+        ]),
+        gatewayFunctions.spawnGateway
+    );
 app.delete("/connections/:connectionId", authenticateToken, validateOptions<Option>([["botId", "string", false]]), gatewayFunctions.destroyGateway);
 
 export default async () => {
     const connectionsToCreate = await prisma.bot.findMany({});
     console.log(`Found ${connectionsToCreate.length} connections to reconnect.`);
     for (const { token, endpointURL, botId, ownerId } of connectionsToCreate) {
-        const data = gatewayFunctions.createConnection({ token, endpointURL, botId, ownerId });
-        console.log(`Created connection ${data.connectionId} with botId of ${data.options.botId}`);
+        const { connectionId, options, ws } = gatewayFunctions.createConnection({ token, endpointURL, botId, ownerId });
+        console.log(`Created connection ${connectionId} with botId of ${options.botId}`);
+        connections.set(connectionId, { options, ws });
     }
     return app;
 };
