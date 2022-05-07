@@ -35,9 +35,18 @@ export function build(connections: ConnectionStore, prisma: PrismaClient) {
         connection.ws.destroy();
         connections.delete(req.params.connectionId);
         await prisma.bot.deleteMany({ where: { botId: req.body.botId } });
-
         return res.status(200).json({ success: true, data: {} });
     };
 
-    return { createConnection, spawnGateway, destroyGateway };
+    const getGateways = async (req: Request, res: Response) => {
+        const storedConnections = await prisma.bot.findMany({ select: { botId: true, endpointURL: true } });
+        const createdConnections = Array.from(connections.entries()).map(([connectionId, data]) => ({
+            botId: data.options.botId,
+            endpointURL: data.options.endpointURL,
+            connectionId,
+        }));
+        return res.status(200).json({ storedConnections, createdConnections });
+    };
+
+    return { createConnection, spawnGateway, destroyGateway, getGateways };
 }

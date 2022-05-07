@@ -17,16 +17,17 @@ app.use(
 app.use(express.json());
 
 app.get("/", (req, res) => res.json({ success: true, data: { message: "Server is alive!" } }));
-app.post(
-    "/connections",
-    validateOptions<Option>([
-        ["botId", "string", false],
-        ["endpointURL", "string", false],
-        ["ownerId", "string", false],
-        ["token", "string", false],
-    ]),
-    gatewayFunctions.spawnGateway
-);
+app.route("/connections")
+    .get(gatewayFunctions.getGateways)
+    .post(
+        validateOptions<Option>([
+            ["botId", "string", false],
+            ["endpointURL", "string", false],
+            ["ownerId", "string", false],
+            ["token", "string", false],
+        ]),
+        gatewayFunctions.spawnGateway
+    );
 app.delete("/connections/:connectionId", validateOptions<Option>([["botId", "string", false]]), gatewayFunctions.destroyGateway);
 
 export default async () => {
