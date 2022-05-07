@@ -1,4 +1,3 @@
-import { WebSocketManager, WebSocketOptions } from "@guildedjs/ws";
 import type { PrismaClient } from "@prisma/client";
 import type { Request, Response } from "express";
 import { nanoid } from "nanoid";
