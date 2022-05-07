@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import express from "express";
 import { build as buildGatewayFunctions } from "./controllers/gateway";
 import type { Connection, Option } from "./typings";
-import { validateOptions } from "./util";
+import { authenticateToken, validateOptions } from "./util";
 
 const app = express();
 const prisma = new PrismaClient();
@@ -19,6 +19,7 @@ app.use(express.json());
 app.get("/", (req, res) => res.json({ success: true, data: { message: "Server is alive!" } }));
 app.post(
     "/connections",
+    authenticateToken,
     validateOptions<Option>([
         ["botId", "string", false],
         ["endpointURL", "string", false],
@@ -27,7 +28,7 @@ app.post(
     ]),
     gatewayFunctions.spawnGateway
 );
-app.delete("/connections/:connectionId", validateOptions<Option>([["botId", "string", false]]), gatewayFunctions.destroyGateway);
+app.delete("/connections/:connectionId", authenticateToken, validateOptions<Option>([["botId", "string", false]]), gatewayFunctions.destroyGateway);
 
 export default async () => {
     const connectionsToCreate = await prisma.bot.findMany({});
