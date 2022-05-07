@@ -24,7 +24,7 @@ export function build(connections: ConnectionStore, prisma: PrismaClient) {
 
     const spawnGateway = async (req: Request, res: Response) => {
         const existingConnection = await prisma.bot.findFirst({ where: { botId: req.body.botId } });
-        if (existingConnection) return res.status(203).json({ success: false, data: { message: `Bot with ID: {${req.body.botId}} already has an existing connection.` } });
+        if (existingConnection) return res.status(418).json({ success: false, data: { message: `Bot with ID: {${req.body.botId}} already has an existing connection.` } });
 
         const { connectionId, options, ws } = createConnection(req.body);
         await prisma.bot.create({ data: options });
