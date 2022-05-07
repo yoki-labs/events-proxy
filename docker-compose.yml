@@ -27,6 +27,7 @@ services:
         environment:
             DATABASE_URL: "postgresql://guilded_interaction_user:guilded_interaction_pass@db:5432/guilded_interaction?schema=public"
             SERVER_PORT: 3335
+            TOKEN_SECRET: "super-secret-token"
         ports:
             - 3335:3335
         networks:
