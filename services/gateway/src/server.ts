@@ -32,8 +32,8 @@ app.delete("/connections/:connectionId", validateOptions<Option>([["botId", "str
 export default async () => {
     const connectionsToCreate = await prisma.bot.findMany({});
     console.log(`Found ${connectionsToCreate.length} connections to reconnect.`);
-    for (const { token, endpointURL, botId, ownerId } of connectionsToCreate) {
-        const data = gatewayFunctions.createConnection({ token, endpointURL, botId, ownerId });
+    for (const { token, endpointURL, botId, ownerId, authorization } of connectionsToCreate) {
+        const data = gatewayFunctions.createConnection({ token, endpointURL, botId, ownerId, authorization });
         console.log(`Created connection ${data.connectionId} with botId of ${data.options.botId}`);
     }
     return app;

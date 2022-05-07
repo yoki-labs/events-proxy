@@ -9,6 +9,7 @@ export interface Option {
     botId: string;
     endpointURL: string;
     ownerId: string;
+    authorization: string;
 }
 
 export type ConnectionStore = Map<string, Connection>;
