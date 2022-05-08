@@ -1,4 +1,3 @@
-import type { WebSocketManager, WebSocketOptions } from "@guildedjs/ws";
 import type { Worker } from "worker_threads";
 
 export interface Connection {
@@ -10,6 +9,10 @@ export interface Option {
     botId: string;
     endpointURL: string;
     ownerId: string;
+}
+export enum WorkerMessage {
+    PostData = 0,
+    DeleteGateway,
 }
 
 export type ConnectionStore = Map<string, Connection>;

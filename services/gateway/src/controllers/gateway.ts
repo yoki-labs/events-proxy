@@ -1,18 +1,17 @@
-import { WebSocketManager, WebSocketOptions } from "@guildedjs/ws";
 import type { PrismaClient } from "@prisma/client";
 import type { Request, Response } from "express";
 import { nanoid } from "nanoid";
 import fetch from "node-fetch";
 import { join } from "path";
 import { Worker } from "worker_threads";
-import type { ConnectionStore, Option } from "../typings";
+import { ConnectionStore, Option, WorkerMessage } from "../typings";
 
 export function build(connections: ConnectionStore, prisma: PrismaClient) {
     const createConnection = ({ botId, endpointURL, ownerId, token }: Option) => {
         const connectionId = nanoid(21);
         const worker = new Worker(join(__dirname, "..", "workers", "Gateway.js"), { workerData: { token } });
         worker.on("message", ({ type, event, data }) => {
-            if (type === 0) {
+            if (type === WorkerMessage.PostData) {
                 fetch(endpointURL, {
                     headers: { Accept: "application/json", "Content-Type": "application/json" },
                     body: JSON.stringify({ event, data: data.d }),
