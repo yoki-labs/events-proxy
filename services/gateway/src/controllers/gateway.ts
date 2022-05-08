@@ -6,6 +6,11 @@ import { join } from "path";
 import { Worker } from "worker_threads";
 import { ConnectionStore, Option, WorkerMessage } from "../typings";
 
+enum RequestType {
+    PING = 0,
+    EVENT,
+}
+
 export function build(connections: ConnectionStore, prisma: PrismaClient) {
     const createConnection = ({ botId, endpointURL, ownerId, token }: Option) => {
         const connectionId = nanoid(21);
@@ -14,7 +19,7 @@ export function build(connections: ConnectionStore, prisma: PrismaClient) {
             if (type === WorkerMessage.PostData) {
                 fetch(endpointURL, {
                     headers: { Accept: "application/json", "Content-Type": "application/json" },
-                    body: JSON.stringify({ event, data: data.d }),
+                    body: JSON.stringify({ type: RequestType.EVENT, event, data: data.d }),
                     method: "POST",
                 })
                     .then(() => console.log(`Successfully sent event ${event} to ${endpointURL} (${botId})`))
