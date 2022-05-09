@@ -1,9 +1,9 @@
 import { join } from "node:path";
 import { Worker } from "worker_threads";
 import { nanoid } from "nanoid";
-import fetch from "node-fetch";
+import fetch, { Response } from "node-fetch";
 import { type Option, WorkerMessage, Connection } from "../typings";
-import { RequestType } from "../util";
+import { RequestType, ResponseType } from "../util";
 
 export const createConnection = ({ botId, endpointURL, ownerId, token }: Option) => {
     const connectionId = nanoid(21);
@@ -15,7 +15,11 @@ export const createConnection = ({ botId, endpointURL, ownerId, token }: Option)
                 body: JSON.stringify({ type: RequestType.EVENT, event, data: data.d }),
                 method: "POST",
             })
-                .then(() => console.log(`Successfully sent event ${event} to ${endpointURL} (${botId})`))
+                .then(async (res) => {
+                    console.log(`Sent event ${event} to ${endpointURL} (${botId})`);
+                    const data = await res.json().catch(() => ({}));
+                    if (data?.type !== ResponseType.RESPOND) console.log(`Didn't receive proper response from ${endpointURL} (${botId}) on event ${event}`);
+                })
                 .catch(console.error);
         }
     });

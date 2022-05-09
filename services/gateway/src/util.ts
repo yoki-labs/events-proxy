@@ -39,4 +39,7 @@ export enum RequestType {
 
 export enum ResponseType {
     PONG = 0,
+    RESPOND,
+    FAILURE,
+    ALIVE,
 }
