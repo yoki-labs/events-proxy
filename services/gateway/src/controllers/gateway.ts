@@ -17,14 +17,14 @@ export function build(connections: ConnectionStore, prisma: PrismaClient) {
     };
 
     const runPonger = () => {
-        const promises: Array<[string, Promise<HTTPResponse>]> = [];
+        const promises: Array<[string, Promise<HTTPResponse | null>]> = [];
         for (const [connectionId, connection] of connections.entries()) {
             promises.push([
                 connectionId,
                 fetch(connection.options.endpointURL, {
                     method: "POST",
                     body: JSON.stringify({ type: RequestType.PING }),
-                }),
+                }).catch(() => null),
             ]);
         }
         return promises;

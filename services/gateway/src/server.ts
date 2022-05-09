@@ -56,12 +56,12 @@ export default async () => {
             if (!connection) return;
 
             // if the response is not a proper 2xx, mark as dead
-            if (!res.ok) {
+            if (!res || !res.ok) {
                 deadConnections.push(connection);
             }
 
             // if the response is proper, parse the body
-            const data = await res.json().catch(() => ({}));
+            const data = await res!.json().catch(() => ({}));
 
             // if the body is not a proper pong response, mark as dead
             if (data?.type !== ResponseType.PONG) return deadConnections.push(connection);
