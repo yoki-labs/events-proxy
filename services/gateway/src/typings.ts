@@ -3,6 +3,7 @@ import type { Worker } from "worker_threads";
 export interface Connection {
     worker: Worker;
     options: Option;
+    connectionId: string;
 }
 export interface Option {
     token: string;

@@ -1,43 +1,33 @@
 import type { PrismaClient } from "@prisma/client";
 import type { Request, Response } from "express";
-import { nanoid } from "nanoid";
-import fetch from "node-fetch";
-import { join } from "path";
-import { Worker } from "worker_threads";
-import { ConnectionStore, Option, WorkerMessage } from "../typings";
-
-enum RequestType {
-    PING = 0,
-    EVENT,
-}
+import fetch, { Response as HTTPResponse } from "node-fetch";
+import type { ConnectionStore } from "../typings";
+import { RequestType } from "../util";
+import { createConnection, destroyConnection } from "./connection";
 
 export function build(connections: ConnectionStore, prisma: PrismaClient) {
-    const createConnection = ({ botId, endpointURL, ownerId, token }: Option) => {
-        const connectionId = nanoid(21);
-        const worker = new Worker(join(__dirname, "..", "workers", "Gateway.js"), { workerData: { token } });
-        worker.on("message", ({ type, event, data }) => {
-            if (type === WorkerMessage.PostData) {
-                fetch(endpointURL, {
-                    headers: { Accept: "application/json", "Content-Type": "application/json" },
-                    body: JSON.stringify({ type: RequestType.EVENT, event, data: data.d }),
-                    method: "POST",
-                })
-                    .then(() => console.log(`Successfully sent event ${event} to ${endpointURL} (${botId})`))
-                    .catch(console.error);
-            }
-        });
-        worker.on("error", console.log);
-        return { connectionId, worker, options: { botId, endpointURL, ownerId, token } };
-    };
-
     const spawnGateway = async (req: Request, res: Response) => {
         const existingConnection = await prisma.bot.findFirst({ where: { botId: req.body.botId } });
         if (existingConnection) return res.status(418).json({ success: false, data: { message: `Bot with ID: {${req.body.botId}} already has an existing connection.` } });
 
         const { connectionId, options, worker } = createConnection(req.body);
         await prisma.bot.create({ data: options });
-        connections.set(connectionId, { options, worker });
+        connections.set(connectionId, { options, worker, connectionId });
         return res.status(200).json({ success: true, data: { connectionId } });
+    };
+
+    const runPonger = () => {
+        const promises: Array<[string, Promise<HTTPResponse>]> = [];
+        for (const [connectionId, connection] of connections.entries()) {
+            promises.push([
+                connectionId,
+                fetch(connection.options.endpointURL, {
+                    method: "POST",
+                    body: JSON.stringify({ type: RequestType.PING }),
+                }),
+            ]);
+        }
+        return promises;
     };
 
     const destroyGateway = async (req: Request, res: Response) => {
@@ -45,9 +35,7 @@ export function build(connections: ConnectionStore, prisma: PrismaClient) {
         if (!connection) return res.status(404).json({ success: false, data: { message: "Connection does not exist" } });
 
         try {
-            connection.worker.postMessage({ type: 1 });
-            connection.worker.removeAllListeners();
-            await connection.worker.terminate();
+            await destroyConnection(connection);
         } catch (e) {
             return res.status(500).json({ success: false, data: { message: "There was an error terminating gateway worker." } });
         }
@@ -67,5 +55,5 @@ export function build(connections: ConnectionStore, prisma: PrismaClient) {
         return res.status(200).json({ storedConnections, createdConnections });
     };
 
-    return { createConnection, spawnGateway, destroyGateway, getGateways };
+    return { createConnection, spawnGateway, destroyGateway, getGateways, runPonger };
 }

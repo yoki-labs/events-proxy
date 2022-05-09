@@ -31,3 +31,12 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
         return res.status(401).json({ success: false, data: { message: "There was an issue parsing the provided token." } });
     }
 }
+
+export enum RequestType {
+    PING = 0,
+    EVENT,
+}
+
+export enum ResponseType {
+    PONG = 0,
+}

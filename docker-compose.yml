@@ -31,7 +31,7 @@ services:
         ports:
             - 3335:3335
         networks:
-            - db-network
+            - db-network 
         extra_hosts:
             - "host.docker.internal:host-gateway"
 
