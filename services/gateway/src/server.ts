@@ -64,7 +64,8 @@ export default async () => {
             const data = await res.json().catch(() => ({}));
 
             // if the body is not a proper pong response, mark as dead
-            if (data?.type !== ResponseType.PONG) deadConnections.push(connection);
+            if (data?.type !== ResponseType.PONG) return deadConnections.push(connection);
+            reconnectAttempts.delete(connection.connectionId);
         });
 
         console.log(`Found ${deadConnections.length} dead connections with IDs ${deadConnections.map((x) => x.connectionId)}`);
